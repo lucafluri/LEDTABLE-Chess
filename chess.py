@@ -275,6 +275,12 @@ def clearBoard():
 			matrix[x][y][1] = 0
 			matrix[x][y][2] = 0
 
+def setColor(x, y, rgb):
+	matrix[x][y][0] = rgb[0]
+	matrix[x][y][1] = rgb[1]
+	matrix[x][y][2] = rgb[2]
+
+
 class game:
 	turn = True #t = white, f = black
 	border = [0,0,5]
@@ -290,6 +296,61 @@ class game:
 		self.turn = not self.turn
 		self.turnInd()
 
+	def paintPiece(self, piece):
+		setColor(piece[0], piece[1], piece[2])
+
+	def paintBorder(self):
+		for x in range(0, 10):
+			setColor(x, 0, self.border)
+		for y in range(1, 10):
+			setColor(9, y, self.border)
+		for x in range(9, -1, -1):
+			setColor(x, 9, self.border)
+		for y in range(9, 0, -1):
+			setColor(0, y, self.border)
+
+	def update(self):
+		clearMatrix()
+		self.paintBorder()
+
+		self.paintPiece(white.P1)
+		self.paintPiece(white.P2)
+		self.paintPiece(white.P3)
+		self.paintPiece(white.P4)
+		self.paintPiece(white.P5)
+		self.paintPiece(white.P6)
+		self.paintPiece(white.P7)
+		self.paintPiece(white.P8)
+		self.paintPiece(white.R1)
+		self.paintPiece(white.R2)
+		self.paintPiece(white.N1)
+		self.paintPiece(white.N2)
+		self.paintPiece(white.B1)
+		self.paintPiece(white.B2)
+		self.paintPiece(white.Q)
+		self.paintPiece(white.K)
+
+		self.paintPiece(black.P1)
+		self.paintPiece(black.P2)
+		self.paintPiece(black.P3)
+		self.paintPiece(black.P4)
+		self.paintPiece(black.P5)
+		self.paintPiece(black.P6)
+		self.paintPiece(black.P7)
+		self.paintPiece(black.P8)
+		self.paintPiece(black.R1)
+		self.paintPiece(black.R2)
+		self.paintPiece(black.N1)
+		self.paintPiece(black.N2)
+		self.paintPiece(black.B1)
+		self.paintPiece(black.B2)
+		self.paintPiece(black.Q)
+		self.paintPiece(black.K)
+
+		self.switch()
+
+		display()
+
 class white:
 	#colors
 	PC = [30, 30, 255]
@@ -300,22 +361,22 @@ class white:
 	KC = [255, 25, 25]
 
 	#Pieces
-	P1 = [1, 7, PC[0], PC[1], PC[2]]
-	P2 = [2, 7, PC[0], PC[1], PC[2]]
-	P3 = [3, 7, PC[0], PC[1], PC[2]]
-	P4 = [4, 7, PC[0], PC[1], PC[2]]
-	P5 = [5, 7, PC[0], PC[1], PC[2]]
-	P6 = [6, 7, PC[0], PC[1], PC[2]]
-	P7 = [7, 7, PC[0], PC[1], PC[2]]
-	P8 = [8, 7, PC[0], PC[1], PC[2]]
-	R1 = [1, 8, RC[0], RC[1], RC[2]]
-	R2 = [8, 8, RC[0], RC[1], RC[2]]
-	N1 = [2, 8, NC[0], NC[1], NC[2]]
-	N2 = [7, 8, NC[0], NC[1], NC[2]]
-	B1 = [3, 8, BC[0], BC[1], BC[2]]
-	B2 = [6, 8, BC[0], BC[1], BC[2]]
-	Q = [4, 8, QC[0], QC[1], QC[2]]
-	K = [5, 8, KC[0], KC[1], KC[2]]
+	P1 = [1, 7, PC]
+	P2 = [2, 7, PC]
+	P3 = [3, 7, PC]
+	P4 = [4, 7, PC]
+	P5 = [5, 7, PC]
+	P6 = [6, 7, PC]
+	P7 = [7, 7, PC]
+	P8 = [8, 7, PC]
+	R1 = [1, 8, RC]
+	R2 = [8, 8, RC]
+	N1 = [2, 8, NC]
+	N2 = [7, 8, NC]
+	B1 = [3, 8, BC]
+	B2 = [6, 8, BC]
+	Q = [4, 8, QC]
+	K = [5, 8, KC]
 
 class black:
 	#colors
@@ -327,28 +388,22 @@ class black:
 	KC = [255, 0, 0]
 
 	#Pieces
-	P1 = [1, 2, PC[0], PC[1], PC[2]]
-	P2 = [2, 2, PC[0], PC[1], PC[2]]
-	P3 = [3, 2, PC[0], PC[1], PC[2]]
-	P4 = [4, 2, PC[0], PC[1], PC[2]]
-	P5 = [5, 2, PC[0], PC[1], PC[2]]
-	P6 = [6, 2, PC[0], PC[1], PC[2]]
-	P7 = [7, 2, PC[0], PC[1], PC[2]]
-	P8 = [8, 2, PC[0], PC[1], PC[2]]
-	R1 = [1, 1, RC[0], RC[1], RC[2]]
-	R2 = [8, 1, RC[0], RC[1], RC[2]]
-	N1 = [2, 1, NC[0], NC[1], NC[2]]
-	N2 = [7, 1, NC[0], NC[1], NC[2]]
-	B1 = [3, 1, BC[0], BC[1], BC[2]]
-	B2 = [6, 1, BC[0], BC[1], BC[2]]
-	Q = [4, 1, QC[0], QC[1], QC[2]]
-	K = [5, 1, KC[0], KC[1], KC[2]]
-
-def setColor(x, y, rgb):
-	matrix[x][y][0] = rgb[0]
-	matrix[x][y][1] = rgb[1]
-	matrix[x][y][2] = rgb[2]
-
+	P1 = [1, 2, PC]
+	P2 = [2, 2, PC]
+	P3 = [3, 2, PC]
+	P4 = [4, 2, PC]
+	P5 = [5, 2, PC]
+	P6 = [6, 2, PC]
+	P7 = [7, 2, PC]
+	P8 = [8, 2, PC]
+	R1 = [1, 1, RC]
+	R2 = [8, 1, RC]
+	N1 = [2, 1, NC]
+	N2 = [7, 1, NC]
+	B1 = [3, 1, BC]
+	B2 = [6, 1, BC]
+	Q = [4, 1, QC]
+	K = [5, 1, KC]
 
 
 def startupAnimation():
@@ -390,8 +445,6 @@ def startupAnimation():
 	clearBoard()
 	display()
 
-
-
 def init():
 	#Pieces
 	for x in range(1, 9):
@@ -424,7 +477,7 @@ def init():
 	for x in range(9, -1, -1):
 		setColor(x, 9, game.border)
 	for y in range(9, 0, -1):
-		setColor(0, y, game.border)	
+		setColor(0, y, game.border)
 
 	game.turnInd()
 	display()
@@ -439,5 +492,17 @@ black = black()
 startupAnimation()
 init()
 
-game.switch()
-init()
+
+#test manual game
+def n():
+	game.update()
+	time.sleep(1)
+
+time.sleep(1)
+white.P5[1] = 5
+n()
+black.P5[1] = 4
+n()
+white.N2[0] -= 1
+white.N2[1] -= 2
+n()
