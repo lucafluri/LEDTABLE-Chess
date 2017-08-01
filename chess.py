@@ -490,7 +490,16 @@ class game:
 
 			self.switch()
 		else:
-			self.endBorder()
+			for piece in self.pieces:
+				self.paintPiece(piece)
+
+			if self.turn:
+				sys.stdout.write(str(self.cmove) + ". " + str(self.moves[-1]) + " ")
+				sys.stdout.flush()
+			else:
+				sys.stdout.write(str(self.moves[-1]) + "\n")
+				sys.stdout.flush()
+				self.cmove += 1
 			print("\n\n" + self.getCurrentSide() + " WON!")
 
 		display()
@@ -1190,7 +1199,7 @@ def m(a, b): #a, b str in Notation
 
 
 #MAIN
-#startupAnimation()
+startupAnimation()
 game = game()
 
 #print("Enter Moves [from to]\n")
