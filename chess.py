@@ -284,42 +284,56 @@ def setColor(x, y, rgb):
 
 def CtoN(x, y): #convert Coordinated to Chess Notation
 	y = str(y)
-	if x==1:
-		return "a" + y
-	if x==2:
-		return "b" + y
-	if x==3:
-		return "c" + y
-	if x==4:
-		return "d" + y
-	if x==5:
-		return "e" + y
-	if x==6:
-		return "f" + y
-	if x==7:
-		return "g" + y
-	if x==8:
-		return "h" + y
+	try:
+		if x==1:
+			return "a" + y
+		if x==2:
+			return "b" + y
+		if x==3:
+			return "c" + y
+		if x==4:
+			return "d" + y
+		if x==5:
+			return "e" + y
+		if x==6:
+			return "f" + y
+		if x==7:
+			return "g" + y
+		if x==8:
+			return "h" + y
+		else:
+			print("ERROR, Wrong Input")
+	except:
+			print("ERROR, Wrong Input")
+
 
 def NtoC(N):	#convert string to tuple
 	x = N[0]
 	y = int(N[1])
-	if x=="a":
-		return (1, y)
-	if x=="b":
-		return (2, y)
-	if x=="c":
-		return (3, y)
-	if x=="d":
-		return (4, y)
-	if x=="e":
-		return (5, y)
-	if x=="f":
-		return (6, y)
-	if x=="g":
-		return (7, y)
-	if x=="h":
-		return (8, y)
+	try:
+		if x=="a":
+			return (1, y)
+		if x=="b":
+			return (2, y)
+		if x=="c":
+			return (3, y)
+		if x=="d":
+			return (4, y)
+		if x=="e":
+			return (5, y)
+		if x=="f":
+			return (6, y)
+		if x=="g":
+			return (7, y)
+		if x=="h":
+			return (8, y)
+		else:
+			print("ERROR, Wrong Input")
+	except:
+		print("ERROR, Wrong Input")
+
+
+
 
 def xToN(x):
 	if x==1:
@@ -338,6 +352,9 @@ def xToN(x):
 		return "g"
 	if x==8:
 		return "h"
+	else:
+		print("ERROR, Wrong Input")
+
 
 
 
@@ -428,7 +445,11 @@ class game:
 		display()
 		print("Moves:")
 
-
+	def getCurrentSide(self):
+		if self.turn:
+			return "White"
+		else:
+			return "Black"
 
 	def turnInd(self):
 		ind = [10, 10, 10]
@@ -474,7 +495,8 @@ class game:
 		if not self.finished:
 			self.switch()
 		else:
-			del(self) #game instance is deleted
+			print("\n\n" + self.getCurrentSide() + " WON!")
+
 		display()
 
 	def refreshBoard(self):
@@ -507,19 +529,29 @@ class game:
 			else:
 				pass
 
-	def checkEnemyPiece(self, x, y):
+	def checkEnemyPiece(self, x, y, side):
 		if not self.freeSquare(x, y):
-			if self.turn and self.getPiece(x, y).side=="black":
-				return True
-			if not self.turn and self.getPiece(x, y).side=="white":
+			if not self.getPiece(x, y).side==side:
 				return True
 			else:
 				return False
 		else:
 			return False
 
-	def checkEnPassant(self, x, y):
-		pass
+	def checkEnPassant(self, pawn, xd):
+		side = pawn.side
+		x, y = pawn.x, pawn.y
+
+		if self.checkEnemyPiece(xd, y, side): #leftside
+			piece = self.getPiece(xd, y)
+			if piece.name=="P" and piece.firstMove:
+				return True
+			else:
+				return False
+		else:
+			return False
+
+
 
 	def sameLane(self, x, y, x0, y0):
 		#same Column
@@ -546,14 +578,14 @@ class game:
 					if not self.freeSquare(x, i):
 						return False #Blocked Route
 					else:
-						return True	#Free Route
+						pass	#Free square
 
 			if y>y0:
 				for i in range(y0+1, y, +1):
-					if not self.freeSquare(x, i):
+					if not self.freeSquare(x0, i):
 						return False
 					else:
-						return True
+						pass
 
 		#same row
 		if y0==y:
@@ -562,13 +594,13 @@ class game:
 					if not self.freeSquare(i, y):
 						return False
 					else:
-						return True
+						pass
 			if x>x0:
 				for i in range(x0+1, x, +1):
 					if not self.freeSquare(i, y):
 						return False
 					else:
-						return True
+						pass
 
 		#same diagonal
 		#positive diagonal
@@ -576,33 +608,39 @@ class game:
 			if x<x0:
 				for i in range(x0-1, x, -1):
 					for v in range(y0-1, y, -1):
-						if not self.freeSquare(i, v):
-							return False
-						else:
-							return True
+						if i-x0==v-y0:
+							if not self.freeSquare(i, v):
+								return False
+							else:
+								pass
+
 			if x>x0:
 				for i in range(x0+1, x, +1):
 					for v in range(y0+1, y, +1):
-						if not self.freeSquare(i, v):
-							return False
-						else:
-							return True
+						if i-x0==v-y0:
+							if not self.freeSquare(i, v):
+								return False
+							else:
+								pass
 		#negative diagonal
 		if x-x0==y0-y:
 			if x-x0>0:
 				for i in range(x0+1, x, +1):
 					for v in range(y0-1, y, -1):
-						if not self.freeSquare(i, v):
-							return False
-						else:
-							return True
+						if i-x0==y0-v:
+							if not self.freeSquare(i, v):
+								return False
+							else:
+								pass
 			if y-y0>0:
 				for i in range(x0-1, x, -1):
 					for v in range(y0+1, y, +1):
-						if not self.freeSquare(i, v):
-							return False
-						else:
-							return True
+						if i-x0==y0-v:
+							if not self.freeSquare(i, v):
+								return False
+							else:
+								pass
+		return True #Completely free Route
 
 
 
@@ -624,17 +662,11 @@ class game:
 
 
 
-	def checkOppCheck(self):
-		if self.turn:
-			side = "white"
-			opp = "black"
-		else:
-			side = "black"
-			opp = "white"
+	def checkOppCheck(self, side):
 
 		#Find opponent king
 		for piece in self.pieces:
-			if piece.name == "K" and piece.side==opp:
+			if piece.name == "K" and not piece.side==side:
 				oppK = piece
 
 		#Find Piece that checked the enemy king
@@ -651,19 +683,14 @@ class game:
 		return False, oppK
 
 	def checkOwnCheck(self, side):
-		if side=="white":
-			opp = "black"
-		if side=="black":
-			opp = "white"
-
-		#Find opponent king
+		#Find own king
 		for piece in self.pieces:
 			if piece.name == "K" and piece.side==side:
 				ownK = piece
 
 		#Find Piece that checked the own king
 		for piece in self.pieces:
-			if piece.side == opp:
+			if not piece.side == side:
 				if piece.checkMove(ownK.x, ownK.y):
 					ownK.check = True
 					return ownK
@@ -734,7 +761,7 @@ class game:
 		pieceD = self.getPiece(x, y)
 		x0, y0 = piece.x, piece.y
 		#Capture
-		if self.checkEnemyPiece(x, y) and piece.checkMove(x, y) and self.checkFutureOwnCheck(piece, x, y):
+		if self.checkEnemyPiece(x, y, piece.side) and piece.checkMove(x, y) and self.checkFutureOwnCheck(piece, x, y):
 			self.removePiece(pieceD)
 			piece.setPos(x, y)
 			#self.cmove += 1
@@ -744,7 +771,7 @@ class game:
 			else:
 				self.moves.append(piece.name + "x" + CtoN(x, y)) #Check for multiple pieces being able to capture
 			#print(self.moves[-1] + "\n")
-			check, king = self.checkOppCheck()
+			check, king = self.checkOppCheck(piece.side)
 			if king.check:
 				if self.checkMate(king):
 					self.moves[-1] = str(self.moves[-1]) + "#"
@@ -756,19 +783,34 @@ class game:
 					game.refreshBoard()
 					self.blinkPiece(king)
 			game.update()
+			piece.moved = True
+			if piece.firstMove == False:
+				piece.firstMove = True
+			else:
+				piece.firstMove = None
+
 			return True
+
+
 		#Normal Move
-		if piece.checkMove(x, y) and self.checkFutureOwnCheck(piece, x, y):
+		if self.checkFutureOwnCheck(piece, x, y) and piece.checkMove(x, y):
 			piece.setPos(x, y)
-			#self.cmove += 1
-			#print("\n Move " + str(self.cmove) + "\n")
+
+
 			if piece.name=="P":
 				self.moves.append(CtoN(x, y))
-			else:
+			if piece.name=="K" and x == x0+2:#Castle Kingside
+				self.moves.append("O-O")
+			if piece.name=="K" and x == x0-2:#Castle Queenside
+				self.moves.append("O-O-O")
+			if not piece.name=="P" and not (piece.name=="K" and x == x0+2) and not (piece.name=="K" and x == x0-2):
 				self.moves.append(piece.name + CtoN(x, y))
-			#print("\n")
-			check, king = self.checkOppCheck()
-			if king.check:
+
+
+
+			#Check Check
+			check, king = self.checkOppCheck(piece.side)
+			if king.check and check:
 				if self.checkMate(king):
 					self.moves[-1] = str(self.moves[-1]) + "#"
 					game.refreshBoard()
@@ -779,6 +821,13 @@ class game:
 					game.refreshBoard()
 					self.blinkPiece(king)
 			game.update()
+
+
+			piece.moved = True
+			if piece.firstMove == False:
+				piece.firstMove = True
+			else:
+				piece.firstMove = None
 			return True
 		else:
 			if piece.name=="P":
@@ -795,6 +844,10 @@ class game:
 
 class piece:
 	name = "piece"
+	firstMove = False
+	moved = False
+
+
 	def __init__(self, x, y):
 		game.pieces.append(self)
 		self.x = x
@@ -807,6 +860,9 @@ class piece:
 	def setPos(self, x, y):
 		self.x = x
 		self.y = y
+
+	def getInfo(self):
+		return str(self.name + "@" + CtoN(self.x, self.y))
 
 
 
@@ -823,17 +879,23 @@ class wP(piece):
 		#Possible Capture (+-1, +1)
 		if game.checkRoute(x, y, self.x, self.y):
 			if game.freeSquare(x, y):
-				if self.y == 2 and (y==self.y+1 or y==self.y+2):
+				if self.y == 2 and (y==self.y+1 or y==self.y+2) and x==self.x:
 					return True
-				if y==self.y+1:
+				if y==self.y+1 and x==self.x:
 					return True
-			if game.checkEnemyPiece(x, y) and ((x==self.x-1 or x==self.x+1) and y==self.y+1): #Capture
-				return True
+			if ((x==self.x-1 or x==self.x+1) and y==self.y+1): #Capture
+				if game.checkEnemyPiece(x, y, self.side): #normal
+					return True
+				if game.checkEnPassant(self, x): #en passant
+					oppP = game.getPiece(x, self.y)
+					game.removePiece(oppP)
+					return True
+				else:
+					return False
 			else:
 				return False
 		else:
 			return False
-		#En Passant...
 
 class bP(piece):
 	name = "P"
@@ -849,17 +911,24 @@ class bP(piece):
 					return True
 				if y==self.y-1:
 					return True
-			if game.checkEnemyPiece(x, y) and ((x==self.x-1 or x==self.x+1) and y==self.y-1): #Capture
-				return True
+			if ((x==self.x-1 or x==self.x+1) and y==self.y-1): #Capture
+				if game.checkEnemyPiece(x, y, self.side): #normal
+					return True
+				if game.checkEnPassant(self, x): #en passant
+					oppP = game.getPiece(x, self.y)
+					game.removePiece(oppP)
+					return True
+				else:
+					return False
 			else:
 				return False
 		else:
 			return False
-		#En Passant
 
 
 class R(piece):
 	name = "R"
+
 	def checkMove(self, x, y):
 		#Possible Move (0, +-y)/(+-x, 0)
 		if game.sameLane(x, y, self.x, self.y):
@@ -867,7 +936,7 @@ class R(piece):
 				if game.freeSquare(x, y):
 					return True
 				else:
-					if game.checkEnemyPiece(x, y):
+					if game.checkEnemyPiece(x, y, self.side):
 						return True
 					else:
 						return False
@@ -889,7 +958,7 @@ class N(piece):
 	def checkMove(self, x, y):
 		#Possible Moves (+-1, +-2)/(+-2, +-1)
 		#8 Squares max
-		if game.freeSquare(x, y) or game.checkEnemyPiece(x, y):
+		if game.freeSquare(x, y) or game.checkEnemyPiece(x, y, self.side):
 			if (((x==self.x+1 or x==self.x-1) and (y==self.y+2 or y==self.y-2)) or ((x==self.x+2 or x==self.x-2) and (y==self.y+1 or y==self.y-1))):
 				return True
 			else:
@@ -910,7 +979,7 @@ class B(piece):
 	def checkMove(self, x, y):
 		#Possible Moves (+-x, 1-y)
 		if game.sameDiagonal(x, y, self.x, self.y) and game.checkRoute(x, y, self.x, self.y):
-			if game.freeSquare(x, y) or game.checkEnemyPiece(x, y):
+			if game.freeSquare(x, y) or game.checkEnemyPiece(x, y, self.side):
 				return True
 			else:
 				False
@@ -933,7 +1002,7 @@ class Q(piece):
 				if game.freeSquare(x, y):
 					return True
 				else:
-					if game.checkEnemyPiece(x, y):
+					if game.checkEnemyPiece(x, y, self.side):
 						return True
 					else:
 						return False
@@ -957,11 +1026,34 @@ class K(piece):
 	def checkMove(self, x, y):
 		#+-1 in every direction
 
-		if game.freeSquare(x, y) or game.checkEnemyPiece(x, y):
+		if game.freeSquare(x, y) or game.checkEnemyPiece(x, y, self.side):
 			if game.sameLane(x, y, self.x, self.y) and (math.fabs(x-self.x)==1 or math.fabs(y-self.y)==1):
 				return True
 			if game.sameDiagonal(x, y, self.x, self.y) and (math.fabs(x-self.x)==1 and math.fabs(y-self.y)==1):
 				return True
+			if not self.moved: #Castle
+				if x==7 and game.getPiece(8, self.y).moved==False: #Kingside
+					if game.checkRoute(5, self.y, 8, self.y):
+						#move rook as king will be moved in move()
+						rook = game.getPiece(8, self.y)
+						rook.x = 6
+						rook.moved=True
+						rook.firstMove=True
+						return True
+					else:
+						return False
+				if x==3 and game.getPiece(1, self.y).moved==False: #Queenside
+					if game.checkRoute(5, self.y, 1, self.y):
+						#move rook as king will be moved in move()
+						rook = 	game.getPiece(1, self.y)
+						rook.x = 4
+						rook.moved=True
+						rook.firstMove=True
+						return True
+					else:
+						return False
+				else:
+					return False
 			else:
 				return False
 		else:
@@ -1014,20 +1106,59 @@ def startupAnimation():
 	clearBoard()
 	display()
 
+def checkInput():
+#falls stdin vorhanden wird es auf input gespeichert
+	if select.select([sys.stdin], [], [], 0)[0]:
+		input = sys.stdin.readline().strip()
+		return input
+	else:
+		pass
+
+
+def m(a, b): #a, b str in Notation
+	time.sleep(1)
+	game.moveN(game.getPieceN(a), b)
 
 
 
 #MAIN
 #startupAnimation()
 game = game()
+print("Enter Moves (from to)\n\n")
+
+while True:
+	input = raw_input("Move? ")
+	try:
+		m(str(input[0:2]), str(input[3:5]))
+	except:
+		print("FATAL ERROR")
 
 
 
-def m(a, b): #a, b str in Notation
-	time.sleep(0.25)
-	game.moveN(game.getPieceN(a), b)
 
 
+
+#TESTS
+
+
+
+'''
+#en passant
+m("e2", "e4")
+m("d7", "d6")
+
+m("e4", "e5")
+m("d6", "d5")
+
+m("a2", "a3")
+m("f7", "f5")
+
+m("e5", "f6")
+'''
+
+
+'''
+#Checkmate test
 m("e2", "e4")
 m("e7", "e5")
 
@@ -1035,12 +1166,10 @@ m("f1", "c4")
 m("a7", "a6")
 
 m("d2", "d4")
-
 m("e5", "d4") #capture exd4
 
 
 m("d1", "d4") #capture Qxd4
-#...
 m("b8", "c6")
 
 
@@ -1048,5 +1177,13 @@ m("d4", "d5")
 m("g7", "g5")
 
 m("d5", "f7") #Capture and Checkmate Qxf7##
-
 m("e8", "e7")#test for move verification
+
+'''
+
+
+
+
+
+
+print("\n\nAll Moves: " + str(game.moves))
