@@ -1199,7 +1199,7 @@ def m(a, b): #a, b str in Notation
 
 
 #MAIN
-startupAnimation()
+#startupAnimation()
 game = game()
 
 #print("Enter Moves [from to]\n")
