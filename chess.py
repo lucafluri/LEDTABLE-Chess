@@ -334,6 +334,7 @@ class game:
 	border = [0,0,5]
 	pieces = []
 	moves = []
+	cmove = 0
 
 	def __init__(self):
 		clearMatrix()
@@ -448,11 +449,10 @@ class game:
 		display()
 
 	def freeSquare(self, x, y):
-		for piece in self.pieces:
-			if piece.x == x and piece.y == y:
-				return False #Square occupied
-			else:
-				return True #Square free!
+		if self.getPiece(x, y):
+			return False #Square occupied
+		else:
+			return True #Square free!
 
 	def getPiece(self, x, y):
 		for piece in self.pieces:
@@ -470,19 +470,26 @@ class game:
 				pass
 
 	def checkEnemyPiece(self, x, y):
-		print self.getPiece(x,y).name
-
-		if self.turn and self.getPiece(x, y).side=="black":
-			return True
-		if not self.turn and self.getPiece(x, y).side=="white":
-			return True
+		print("Checking " + CtoN(x, y) + "...")
+		if not self.freeSquare(x, y):
+			print("Not free at " + CtoN(x, y))
+			if self.turn and self.getPiece(x, y).side=="black":
+				print("Black Enemy Piece at " + CtoN(x, y))
+				return True
+			if not self.turn and self.getPiece(x, y).side=="white":
+				print("White Enemy Piece at " + CtoN(x, y))
+				return True
+			else:
+				print("Friendly Piece Piece at " + CtoN(x, y))
+				return False
 		else:
+			print("Empty Square at " + CtoN(x, y))
 			return False
 
 	def checkEnPassant(self, x, y):
 		pass
 
-	def sameLane(self, sx, y, x0, y0):
+	def sameLane(self, x, y, x0, y0):
 		#same Column
 		if x0==x or y0==y:
 			return True
@@ -498,6 +505,8 @@ class game:
 
 	def checkRoute(self, x, y, x0, y0):
 		#check if direct route to destination is unblocked
+		if math.fabs(x-x0)==1 or math.fabs(y-y0)==1: #only 1 move
+			return True
 		#same Column
 		if x0==x:
 			if y<y0:
@@ -508,8 +517,10 @@ class game:
 						return True	#Free Route
 
 			if y>y0:
+				print("Correct boolean in checkroute")
 				for i in range(y0+1, y, +1):
 					if not self.freeSquare(x, i):
+						print("FAAAAAIL")
 						return False
 					else:
 						return True
@@ -567,10 +578,31 @@ class game:
 	def checkCheck(self):
 		pass
 
+	def removePiece(self, piece):
+		self.pieces.remove(piece)
+
+	def addPiece(self, piece):
+		self.pieces.append(piece)
+
+
 	def move(self, piece, x, y):
+		pieceD = self.getPiece(x, y)
+		x0, y0 = piece.x, piece.y
+		if self.checkEnemyPiece(x, y) and piece.checkMove(x, y):
+			self.removePiece(pieceD)
+			piece.setPos(x, y)
+			game.update()
+			self.cmove += 1
+			print("\n Move " + str(self.cmove) + "\n")
+			print(piece.name + "@" + CtoN(x0, y0) + " to " + CtoN(x, y) + "\n")
+			print(piece.name + " captured " + pieceD.name)
+			return True
 		if piece.checkMove(x, y):
 			piece.setPos(x, y)
 			game.update()
+			self.cmove += 1
+			print("\n Move " + str(self.cmove) + "\n")
+			print(piece.name + "@" + CtoN(x0, y0) + " to " + CtoN(x, y) + "\n")
 			return True
 		else:
 			print("Illegal Move: " + piece.name + " on " + CtoN(piece.x, piece.y) + " to " + CtoN(x, y))
@@ -578,9 +610,24 @@ class game:
 
 	def moveN(self, piece, N):
 		x, y = NtoC(N)
+		x0, y0 = piece.x, piece.y
+		pieceD = self.getPiece(x, y)
+		if self.checkEnemyPiece(x, y) and piece.checkMove(x, y):
+			self.removePiece(pieceD)
+			piece.setPos(x, y)
+			game.update()
+			self.cmove += 1
+			print("\n Move " + str(self.cmove) + "\n")
+			print(piece.name + "@" + CtoN(x0, y0) + " to " + CtoN(x, y) + "\n")
+
+			print(piece.name + " captured " + pieceD.name)
+			return True
 		if piece.checkMove(x, y):
 			piece.setPos(x, y)
 			game.update()
+			self.cmove += 1
+			print("\n Move " + str(self.cmove) + "\n")
+			print(piece.name + "@" + CtoN(x0, y0) + " to " + CtoN(x, y) + "\n")
 			return True
 		else:
 			print("Illegal Move: " + piece.name + " on " + CtoN(piece.x, piece.y) + " to " + CtoN(x, y))
@@ -725,14 +772,18 @@ class Q(piece):
 	name = "Queen"
 	def checkMove(self, x, y):
 		#Possible diagonal and lane moves
-		if (game.sameDiagonal(x, y, self.x, self.y) or game.sameLane(x, y, self.x, self.y)) and game.checkRoute(x, y, self.x, self.y):
-			if game.freeSquare(x, y):
-				return True
-			else:
-				if game.checkEnemyPiece(x, y):
+		if (game.sameDiagonal(x, y, self.x, self.y) or game.sameLane(x, y, self.x, self.y)):
+			if game.checkRoute(x, y, self.x, self.y):
+				if game.freeSquare(x, y):
 					return True
 				else:
-					return False
+					if game.checkEnemyPiece(x, y):
+						return True
+					else:
+						return False
+			else:
+				print("Checkroute Fail class Q")
+				return False
 		else:
 			return False
 
@@ -817,21 +868,10 @@ def startupAnimation():
 game = game()
 
 
+
 def m(a, b): #a, b str in Notation
-
 	time.sleep(1)
-	piece1 = game.getPieceN(a)
-	piece2 = game.getPieceN(b)
-	xb, yb = NtoC(b)
-
-	if not game.freeSquare(xb, yb) and game.checkEnemyPiece(xb, yb) and game.moveN(game.getPieceN(a), b):
-		game.pieces.remove(piece2)
-		print(piece2.name + " removed")
-	else:
-		print("Normal Move")
-		game.moveN(game.getPieceN(a), b)
-
-
+	game.moveN(game.getPieceN(a), b)
 
 
 m("e2", "e4")
@@ -841,7 +881,9 @@ m("f1", "c4")
 m("a7", "a6")
 
 m("d2", "d4")
+
 m("e5", "d4") #capture exd4
+
 
 m("d1", "d4") #capture Qxd4
 #...
