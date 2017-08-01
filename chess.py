@@ -7,6 +7,8 @@ import random
 import sys
 import os
 import select
+import numpy
+import math
 from imgdisp import imgdisp
 
 # Open SPI device
@@ -19,7 +21,6 @@ fcntl.ioctl(spidev, 0x40046b04, array.array('L', [400000]))
 #creating 10x10 matrix
 matrix = [[[0 for x in range(3)] for x in range(10)] for x in range(10)]
 cmatrix = [[[0 for x in range(3)] for x in range(10)] for x in range(10)]
-
 
 #Define Functions for Allocation and Display
 def allocate():
@@ -252,11 +253,12 @@ def allocate():
 def display():
 	#allocating
 	allocate()
+	fmatrix = numpy.fliplr(cmatrix)
 	for x in range(0, 10):
 		for y in range(0, 10):
-			rgb[0] = cmatrix[x][y][0]
-			rgb[1] = cmatrix[x][y][1]
-			rgb[2] = cmatrix[x][y][2]
+			rgb[0] = fmatrix[x][y][0]
+			rgb[1] = fmatrix[x][y][1]
+			rgb[2] = fmatrix[x][y][2]
 			spidev.write(rgb)
 
 	spidev.flush()
@@ -280,24 +282,147 @@ def setColor(x, y, rgb):
 	matrix[x][y][1] = rgb[1]
 	matrix[x][y][2] = rgb[2]
 
+def CtoN(x, y): #convert Coordinated to Chess Notation
+	y = str(y)
+	if x==1:
+		return "a" + y
+	if x==2:
+		return "b" + y
+	if x==3:
+		return "c" + y
+	if x==4:
+		return "d" + y
+	if x==5:
+		return "e" + y
+	if x==6:
+		return "f" + y
+	if x==7:
+		return "g" + y
+	if x==8:
+		return "h" + y
+
+def NtoC(N):	#convert string to tuple
+	x = N[0]
+	y = int(N[1])
+	if x=="a":
+		return (1, y)
+	if x=="b":
+		return (2, y)
+	if x=="c":
+		return (3, y)
+	if x=="d":
+		return (4, y)
+	if x=="e":
+		return (5, y)
+	if x=="f":
+		return (6, y)
+	if x=="g":
+		return (7, y)
+	if x=="h":
+		return (8, y)
+
+
+
+
+
+
+
+
 
 class game:
-	turn = True #t = white, f = black
+	turn = False #t = white, f = black
 	border = [0,0,5]
+	pieces = []
+	moves = []
+
+	def __init__(self):
+		clearMatrix()
+		self.paintBorder()
+
+		wP1 = wP(1, 2)
+		self.paintPiece(wP1)
+		wP2 = wP(2, 2)
+		self.paintPiece(wP2)
+		wP3 = wP(3, 2)
+		self.paintPiece(wP3)
+		wP4 = wP(4, 2)
+		self.paintPiece(wP4)
+		wP5 = wP(5, 2)
+		self.paintPiece(wP5)
+		wP6 = wP(6, 2)
+		self.paintPiece(wP6)
+		wP7 = wP(7, 2)
+		self.paintPiece(wP7)
+		wP8 = wP(8, 2)
+		self.paintPiece(wP8)
+		wR1 = wR(1, 1)
+		self.paintPiece(wR1)
+		wR2 = wR(8, 1)
+		self.paintPiece(wR2)
+		wN1 = wN(2, 1)
+		self.paintPiece(wN1)
+		wN2 = wN(7, 1)
+		self.paintPiece(wN2)
+		wB1 = wB(3, 1)
+		self.paintPiece(wB1)
+		wB2 = wB(6, 1)
+		self.paintPiece(wB2)
+		wQ1 = wQ(4, 1)
+		self.paintPiece(wQ1)
+		wK1 = wK(5, 1)
+		self.paintPiece(wK1)
+
+		bP1 = bP(1, 7)
+		self.paintPiece(bP1)
+		bP2 = bP(2, 7)
+		self.paintPiece(bP2)
+		bP3 = bP(3, 7)
+		self.paintPiece(bP3)
+		bP4 = bP(4, 7)
+		self.paintPiece(bP4)
+		bP5 = bP(5, 7)
+		self.paintPiece(bP5)
+		bP6 = bP(6, 7)
+		self.paintPiece(bP6)
+		bP7 = bP(7, 7)
+		self.paintPiece(bP7)
+		bP8 = bP(8, 7)
+		self.paintPiece(bP8)
+		bR1 = bR(1, 8)
+		self.paintPiece(bR1)
+		bR2 = bR(8, 8)
+		self.paintPiece(bR2)
+		bN1 = bN(2, 8)
+		self.paintPiece(bN1)
+		bN2 = bN(7, 8)
+		self.paintPiece(bN2)
+		bB1 = bB(3, 8)
+		self.paintPiece(bB1)
+		bB2 = bB(6, 8)
+		self.paintPiece(bB2)
+		bQ1 = bQ(4, 8)
+		self.paintPiece(bQ1)
+		bK1 = bK(5, 8)
+		self.paintPiece(bK1)
+
+		self.switch()
+		display()
+
+
 
 	def turnInd(self):
 		ind = [10, 10, 10]
 		if self.turn: #white
-			setColor(9, 9, ind)
-		else: #black
 			setColor(9, 0, ind)
+		else: #black
+			setColor(9, 9, ind)
 
 	def switch(self):
 		self.turn = not self.turn
 		self.turnInd()
 
 	def paintPiece(self, piece):
-		setColor(piece[0], piece[1], piece[2])
+		setColor(piece.x, piece.y, piece.color)
 
 	def paintBorder(self):
 		for x in range(0, 10):
@@ -309,101 +434,340 @@ class game:
 		for y in range(9, 0, -1):
 			setColor(0, y, self.border)
 
+
+
+
 	def update(self):
 		clearMatrix()
 		self.paintBorder()
 
-		self.paintPiece(white.P1)
-		self.paintPiece(white.P2)
-		self.paintPiece(white.P3)
-		self.paintPiece(white.P4)
-		self.paintPiece(white.P5)
-		self.paintPiece(white.P6)
-		self.paintPiece(white.P7)
-		self.paintPiece(white.P8)
-		self.paintPiece(white.R1)
-		self.paintPiece(white.R2)
-		self.paintPiece(white.N1)
-		self.paintPiece(white.N2)
-		self.paintPiece(white.B1)
-		self.paintPiece(white.B2)
-		self.paintPiece(white.Q)
-		self.paintPiece(white.K)
-
-		self.paintPiece(black.P1)
-		self.paintPiece(black.P2)
-		self.paintPiece(black.P3)
-		self.paintPiece(black.P4)
-		self.paintPiece(black.P5)
-		self.paintPiece(black.P6)
-		self.paintPiece(black.P7)
-		self.paintPiece(black.P8)
-		self.paintPiece(black.R1)
-		self.paintPiece(black.R2)
-		self.paintPiece(black.N1)
-		self.paintPiece(black.N2)
-		self.paintPiece(black.B1)
-		self.paintPiece(black.B2)
-		self.paintPiece(black.Q)
-		self.paintPiece(black.K)
+		for piece in self.pieces:
+			self.paintPiece(piece)
 
 		self.switch()
-
 		display()
 
-class white:
-	#colors
-	PC = [30, 30, 255]
-	RC = [100, 25, 255]
-	NC = [0, 255, 100]
-	BC = [255, 255, 60]
-	QC = [255, 100, 255]
-	KC = [255, 25, 25]
+	def freeSquare(self, x, y):
+		for piece in self.pieces:
+			if piece.x == x and piece.y == y:
+				return False #Square occupied
+			else:
+				return True #Square free!
 
-	#Pieces
-	P1 = [1, 7, PC]
-	P2 = [2, 7, PC]
-	P3 = [3, 7, PC]
-	P4 = [4, 7, PC]
-	P5 = [5, 7, PC]
-	P6 = [6, 7, PC]
-	P7 = [7, 7, PC]
-	P8 = [8, 7, PC]
-	R1 = [1, 8, RC]
-	R2 = [8, 8, RC]
-	N1 = [2, 8, NC]
-	N2 = [7, 8, NC]
-	B1 = [3, 8, BC]
-	B2 = [6, 8, BC]
-	Q = [4, 8, QC]
-	K = [5, 8, KC]
+	def getPiece(self, x, y):
+		for piece in self.pieces:
+			if piece.x == x and piece.y == y:
+				return piece
+			else:
+				pass
 
-class black:
-	#colors
-	PC = [0, 0, 255]
-	RC = [50, 0, 255]
-	NC = [0, 255, 0]
-	BC = [255, 255, 0]
-	QC = [255, 0, 255]
-	KC = [255, 0, 0]
+	def getPieceN(self, N):
+		x, y = NtoC(N)
+		for piece in self.pieces:
+			if piece.x == x and piece.y == y:
+				return piece
+			else:
+				pass
 
-	#Pieces
-	P1 = [1, 2, PC]
-	P2 = [2, 2, PC]
-	P3 = [3, 2, PC]
-	P4 = [4, 2, PC]
-	P5 = [5, 2, PC]
-	P6 = [6, 2, PC]
-	P7 = [7, 2, PC]
-	P8 = [8, 2, PC]
-	R1 = [1, 1, RC]
-	R2 = [8, 1, RC]
-	N1 = [2, 1, NC]
-	N2 = [7, 1, NC]
-	B1 = [3, 1, BC]
-	B2 = [6, 1, BC]
-	Q = [4, 1, QC]
-	K = [5, 1, KC]
+	def checkEnemyPiece(self, x, y):
+		print self.getPiece(x,y).name
+
+		if self.turn and self.getPiece(x, y).side=="black":
+			return True
+		if not self.turn and self.getPiece(x, y).side=="white":
+			return True
+		else:
+			return False
+
+	def checkEnPassant(self, x, y):
+		pass
+
+	def sameLane(self, sx, y, x0, y0):
+		#same Column
+		if x0==x or y0==y:
+			return True
+		else:
+			return False
+
+	def sameDiagonal(self, x, y, x0, y0):
+		if x-x0==y-y0 or x-x0==y0-y:
+			return True
+		else:
+			return False
+
+
+	def checkRoute(self, x, y, x0, y0):
+		#check if direct route to destination is unblocked
+		#same Column
+		if x0==x:
+			if y<y0:
+				for i in range(y0-1, y, -1):
+					if not self.freeSquare(x, i):
+						return False #Blocked Route
+					else:
+						return True	#Free Route
+
+			if y>y0:
+				for i in range(y0+1, y, +1):
+					if not self.freeSquare(x, i):
+						return False
+					else:
+						return True
+
+		#same row
+		if y0==y:
+			if x<x0:
+				for i in range(x0-1, x, -1):
+					if not self.freeSquare(i, y):
+						return False
+					else:
+						return True
+			if x>x0:
+				for i in range(x0+1, x, +1):
+					if not self.freeSquare(i, y):
+						return False
+					else:
+						return True
+
+		#same diagonal
+		#positive diagonal
+		if x-x0==y-y0:
+			if x<x0:
+				for i in range(x0-1, x, -1):
+					for v in range(y0-1, y, -1):
+						if not self.freeSquare(i, v):
+							return False
+						else:
+							return True
+			if x>x0:
+				for i in range(x0+1, x, +1):
+					for v in range(y0+1, y, +1):
+						if not self.freeSquare(i, v):
+							return False
+						else:
+							return True
+		#negative diagonal
+		if x-x0==y0-y:
+			if x-x0>0:
+				for i in range(x0+1, x, +1):
+					for v in range(y0-1, y, -1):
+						if not self.freeSquare(i, v):
+							return False
+						else:
+							return True
+			if y-y0>0:
+				for i in range(x0-1, x, -1):
+					for v in range(y0+1, y, +1):
+						if not self.freeSquare(i, v):
+							return False
+						else:
+							return True
+
+
+	def checkCheck(self):
+		pass
+
+	def move(self, piece, x, y):
+		if piece.checkMove(x, y):
+			piece.setPos(x, y)
+			game.update()
+			return True
+		else:
+			print("Illegal Move: " + piece.name + " on " + CtoN(piece.x, piece.y) + " to " + CtoN(x, y))
+			return False
+
+	def moveN(self, piece, N):
+		x, y = NtoC(N)
+		if piece.checkMove(x, y):
+			piece.setPos(x, y)
+			game.update()
+			return True
+		else:
+			print("Illegal Move: " + piece.name + " on " + CtoN(piece.x, piece.y) + " to " + CtoN(x, y))
+			return False
+
+
+
+
+
+class piece:
+	name = "piece"
+	def __init__(self, x, y):
+		game.pieces.append(self)
+		self.x = x
+		self.y = y
+		self.captured = False
+
+	def checkMove(self, x, y):
+		pass
+
+	def setPos(self, x, y):
+		self.x = x
+		self.y = y
+
+
+
+
+class wP(piece):
+	name = "white Pawn"
+	color = [30, 30, 255]
+	side = "white"
+
+
+	def checkMove(self, x, y):
+		#Normal move (0, +1)
+		#Possible first move (0, +2)
+		#Possible Capture (+-1, +1)
+		if game.freeSquare(x, y):
+			if self.y == 2 and (y==self.y+1 or y==self.y+2):
+				return True
+			if y==self.y+1:
+				return True
+		if game.checkEnemyPiece(x, y) and ((x==self.x-1 or x==self.x+1) and y==self.y+1): #Capture
+			return True
+		else:
+			return False
+		#En Passant...
+
+class bP(piece):
+	name = "black Pawn"
+	color = [0, 0, 255]
+	side = "black"
+	def checkMove(self, x, y):
+		#Normal move (0, -1)
+		#Possible first move (0, -2)
+		#Possible Capture (+-1, -1)
+		if game.freeSquare(x, y):
+			if self.y == 7 and (y==self.y-1 or y==self.y-2):
+				return True
+			if y==self.y-1:
+				return True
+		if game.checkEnemyPiece(x, y) and ((x==self.x-1 or x==self.x+1) and y==self.y-1): #Capture
+			return True
+		else:
+			return False
+		#En Passant
+
+
+class R(piece):
+	name = "Rook"
+	def checkMove(self, x, y):
+		#Possible Move (0, +-y)/(+-x, 0)
+		if game.sameLane(x, y, self.x, self.y):
+			if game.checkRoute(x, y, self.x, self.y):
+				if game.freeSquare(x, y):
+					return True
+				else:
+					if game.checkEnemyPiece(x, y):
+						return True
+					else:
+						return False
+			else:
+				return False
+		else:
+			return False
+
+class wR(R):
+	name = "white Rook"
+	color = [100, 25, 255]
+	side = "white"
+
+class bR(R):
+	name = "black Rook"
+	color = [50, 0, 255]
+	side = "black"
+
+class N(piece):
+	name = "Knight"
+	def checkMove(self, x, y):
+		#Possible Moves (+-1, +-2)/(+-2, +-1)
+		#8 Squares max
+		if game.freeSquare(x, y) or game.checkEnemyPiece(x, y):
+			if (((x==self.x+1 or x==self.x-1) and (y==self.y+2 or y==self.y-2)) or ((x==self.x+2 or x==self.x-2) and (y==self.y+1 or y==self.y-1))):
+				return True
+			else:
+				return False
+		else:
+			return False
+
+
+class wN(N):
+	name = "white Knight"
+	color = [0, 255, 100]
+	side = "white"
+class bN(N):
+	name = "black Knight"
+	color = [0, 255, 0]
+	side = "black"
+
+class B(piece):
+	name = "Bishop"
+	def checkMove(self, x, y):
+		#Possible Moves (+-x, 1-y)
+		if game.sameDiagonal(x, y, self.x, self.y) and game.checkRoute(x, y, self.x, self.y):
+			if game.freeSquare(x, y) or game.checkEnemyPiece(x, y):
+				return True
+			else:
+				False
+		else:
+			return False
+
+class wB(B):
+	name = "white Bishop"
+	color = [255, 255, 60]
+	side = "white"
+class bB(B):
+	name = "black Bishop"
+	color = [255, 255, 0]
+	side = "black"
+
+class Q(piece):
+	name = "Queen"
+	def checkMove(self, x, y):
+		#Possible diagonal and lane moves
+		if (game.sameDiagonal(x, y, self.x, self.y) or game.sameLane(x, y, self.x, self.y)) and game.checkRoute(x, y, self.x, self.y):
+			if game.freeSquare(x, y):
+				return True
+			else:
+				if game.checkEnemyPiece(x, y):
+					return True
+				else:
+					return False
+		else:
+			return False
+
+
+class wQ(Q):
+	name = "white Queen"
+	color = [255, 100, 255]
+	side = "white"
+class bQ(Q):
+	name = "black Queen"
+	color = [255, 0, 255]
+	side = "black"
+
+class K(piece):
+	name = "King"
+	def checkMove(self, x, y):
+		#+-1 in every direction
+		if game.freeSquare(x, y) or game.checkEnemyPiece(x, y):
+			if game.sameLane(x, y, self.x, self.y) and (math.fabs(x-self.x)==1 or math.fabs(y-self.y)==1):
+				return True
+			if game.sameDiagonal(x, y, self.x, self.y) and (math.fabs(x-self.x)==1 and math.fabs(y-self.y)==1):
+				return True
+			else:
+				return False
+		else:
+			return False
+
+class wK(K):
+	name = "white King"
+	color = [255, 25, 25]
+	side = "white"
+class bK(K):
+	name = "black King"
+	color = [255, 0, 0]
+	side = "black"
 
 
 def startupAnimation():
@@ -445,64 +809,46 @@ def startupAnimation():
 	clearBoard()
 	display()
 
-def init():
-	#Pieces
-	for x in range(1, 9):
-		setColor(x, 7, white.PC) #wP
-	setColor(1, 8, white.RC)	#wR
-	setColor(8, 8, white.RC)
-	setColor(2, 8, white.NC)	#wN
-	setColor(7, 8, white.NC)
-	setColor(3, 8, white.BC)	#wB
-	setColor(6, 8, white.BC)
-	setColor(4, 8, white.QC)	#wQ
-	setColor(5, 8, white.KC)		#wK
-
-	for x in range(1, 9):
-		setColor(x, 2, black.PC)	#bP
-	setColor(1, 1, black.RC)	#bR
-	setColor(8, 1, black.RC)
-	setColor(2, 1, black.NC)	#bN
-	setColor(7, 1, black.NC)
-	setColor(3, 1, black.BC) #bB
-	setColor(6, 1, black.BC)
-	setColor(4, 1, black.QC)	#bQ
-	setColor(5, 1, black.KC)	#bK
-
-	#Border
-	for x in range(0, 10):
-		setColor(x, 0, game.border)
-	for y in range(1, 10):
-		setColor(9, y, game.border)
-	for x in range(9, -1, -1):
-		setColor(x, 9, game.border)
-	for y in range(9, 0, -1):
-		setColor(0, y, game.border)
-
-	game.turnInd()
-	display()
 
 
 
 #MAIN
+#startupAnimation()
 game = game()
-white = white()
-black = black()
-
-startupAnimation()
-init()
 
 
-#test manual game
-def n():
-	game.update()
+def m(a, b): #a, b str in Notation
+
 	time.sleep(1)
+	piece1 = game.getPieceN(a)
+	piece2 = game.getPieceN(b)
+	xb, yb = NtoC(b)
 
-time.sleep(1)
-white.P5[1] = 5
-n()
-black.P5[1] = 4
-n()
-white.N2[0] -= 1
-white.N2[1] -= 2
-n()
+	if not game.freeSquare(xb, yb) and game.checkEnemyPiece(xb, yb) and game.moveN(game.getPieceN(a), b):
+		game.pieces.remove(piece2)
+		print(piece2.name + " removed")
+	else:
+		print("Normal Move")
+		game.moveN(game.getPieceN(a), b)
+
+
+
+
+m("e2", "e4")
+m("e7", "e5")
+
+m("f1", "c4")
+m("a7", "a6")
+
+m("d2", "d4")
+m("e5", "d4") #capture exd4
+
+m("d1", "d4") #capture Qxd4
+#...
+m("b8", "c6")
+
+
+m("d4", "d5")
+m("g7", "g5")
+
+m("d5", "f7") #Capture and Checkmate Qxf7##
