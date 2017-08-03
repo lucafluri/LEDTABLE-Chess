@@ -15,10 +15,10 @@ Obviously there wont be any checkerboard pattern during play, but i might use it
 - ~~Program base App~~
 - ~~Choose and test Colors for Pieces~~
 - ~~Check for Checks and Mates~~
-- ListPossibleMoves(side)
-- Check for Stalemates
-- Correct Chess Notation output
-  - Check for same piece that might be able to move to Square (Only Knights, i.e. Nexf3 or N3f5)
+- ~~ListPossibleMoves(side)~~
+- ~~Check for Stalemates~~
+- ~~Correct Chess Notation output~~
+  - ~~Check for same piece that might be able to move to Square (No Pawns)~~
 - Chess Notation Parser for Input
   - Detect if input is [Square Square] or correct Notation
   - Find Piece and execute move
@@ -38,7 +38,7 @@ Obviously there wont be any checkerboard pattern during play, but i might use it
   - Move Eval()
     - For each Piece, list all pieces it is protected by
     - Update all piece information  
-    
+
 .  
 .  
 .    
