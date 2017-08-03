@@ -547,6 +547,22 @@ class game:
         x, y = NtoC(N)
         return self.getPiece(x, y)
 
+    def findPiece(self, side, name, dest, x0, y0):
+        x, y = dest[0], dest[1]
+
+        for piece in self.pieces:
+            if piece.name==name and piece.side==side:
+                if piece.checkMove(x, y):
+                    if self.checkFutureOwnCheck(piece, x, y):
+                        if piece.x==x0:
+                            return piece
+                        if piece.y==y0:
+                            return piece
+                        if x0==None and y0==None:
+                            return piece
+
+        return None
+
     def checkEnemyPiece(self, x, y, side):
         if not self.freeSquare(x, y):
             if not self.getPiece(x, y).side == side:
@@ -832,7 +848,6 @@ class game:
                 return True
         return False
 
-
     #Checks for Draw of Current side
     # Stalemate
     def checkDraw(self, side):
@@ -844,7 +859,6 @@ class game:
             return True
         else:
             return False
-
 
     def getPossibleMoves(self, side):
         pmoves = []
@@ -858,19 +872,32 @@ class game:
                                 pmoves.append(piece.getInfo() + " to " + CtoN(i, v))
         return pmoves
 
-    def promotion(self, pawn):
+    def promotion(self, pawn, x, y, new):
         side = pawn.side
-        x, y = pawn.x, pawn.y
 
-        if (pawn.base == 2 and y == 8):
-            # promotion
+        if (pawn.base == 2 and y == 8): #white
             self.removePiece(pawn)
-            new = wQ(x, y)
+            # promotion
+            if new=="Q":
+                new = wQ(x, y)
+            if new=="B":
+                new = wB(x, y)
+            if new=="N":
+                new = wN(x, y)
+            if new=="R":
+                new = wR(x, y)
             return True
-        if (pawn.base == 7 and y == 1):
-            # promotion
+        if (pawn.base == 7 and y == 1): #black
             self.removePiece(pawn)
-            new = bQ(x, y)
+            # promotion
+            if new=="Q":
+                new = bQ(x, y)
+            if new=="B":
+                new = bB(x, y)
+            if new=="N":
+                new = bN(x, y)
+            if new=="R":
+                new = bR(x, y)
             return True
         else:
             return False
@@ -878,9 +905,9 @@ class game:
     def illegal(self, piece, x, y):
         self.blinkPiece(piece)
         if piece.name == "P":
-            print("\nIllegal Move: " + CtoN(x, y))
+            print("Illegal Move: " + CtoN(x, y))
         else:
-            print("\nIllegal Move: " + piece.name + CtoN(x, y))
+            print("Illegal Move: " + piece.name + CtoN(x, y))
         return False
 
     def checkDouble(self, piece, x, y):
@@ -889,12 +916,14 @@ class game:
                 if double.checkMove(x, y):
                     if self.checkFutureOwnCheck(double, x, y):
                         #on same column
-                        if self.sameCol(double.x, piece.x):
+                        if piece.x==double.x:
                             self.moves[-1] = self.moves[-1][:1] + str(piece.y) + self.moves[-1][1:]
+                            return True
                         #same row
-                        if self.sameRow(double.y, piece.y):
-                            self.moves[-1] = self.moves[-1][:1] + str(piece.x) + self.moves[-1][1:]
-
+                        else:
+                            self.moves[-1] = self.moves[-1][:1] + xToN(piece.x) + self.moves[-1][1:]
+                            return True
+        return False
 
     def execMove(self, piece, x, y):
         piece.moved = True
@@ -908,17 +937,17 @@ class game:
         self.mateChecker()
         self.update()
 
-
-
-    def move(self, piece, x, y):
+    def move(self, piece, x, y, promote):
         if(x < 1 or x > 8) or (y < 1 or y > 8):
             print("Wrong Input")
             return self.illegal(piece, x, y)
+        if piece==None:
+            print("ERROR: Piece=NONE")
         try:
             if not piece.side == self.getCurrentSide():
+                ("\nWrong Side!")
                 return self.illegal(piece, x, y)
         except:
-            print("No Piece at " + str(x) + ", "+ str(y))
             return False
 
         x0, y0 = piece.x, piece.y
@@ -933,8 +962,9 @@ class game:
                     #self.cmove += 1
                     #print("\n Move " + str(self.cmove) + "\n")
                     if piece.name == "P":
-                        if self.promotion(piece):
-                            self.moves.append(xToN(x0) + "x" + CtoN(x, y) + "=Q")
+                        if self.promotion(piece, x, y, promote):
+                            self.moves.append(xToN(x0) + "x" + CtoN(x, y) + "=" + promote)
+                            piece = self.getPiece(x, y)
                         else:
                             self.moves.append(xToN(x0) + "x" + CtoN(x, y))
                     else:
@@ -951,7 +981,7 @@ class game:
                 if piece.name=="P" and piece.enPassant:
                     check, pawn = self.checkEnPassant(piece)
                     if check:
-                        self.moves.append(xToN(x0) + "x" + CtoN(x, y0))
+                        self.moves.append(xToN(x0) + "x" + CtoN(x, y))
                         piece.enPassant = False
                         self.removePiece(pawn)
                         self.execMove(piece, x, y)
@@ -961,8 +991,9 @@ class game:
                 else:
 
                     if piece.name == "P":
-                        if self.promotion(piece):
-                            self.moves.append(CtoN(x, y) + "=Q")
+                        if self.promotion(piece, x, y, promote):
+                            self.moves.append(CtoN(x, y) + "=" + promote)
+                            piece = self.getPiece(x, y)
                         else:
                             self.moves.append(CtoN(x, y))
                     if piece.name == "K" and x == x0 + 2:  # Castle Kingside
@@ -976,15 +1007,97 @@ class game:
                     return True
 
             else:
-                print("Check Future Fail")
+                print("\nKing will be in Check")
                 return self.illegal(piece, x, y)
         else:
-            print("Check move Fail")
+            print("\nCan't move there")
             return self.illegal(piece, x, y)
 
-    def moveN(self, piece, N):
+    def moveN(self, piece, N, promote):
         x, y = NtoC(N)
-        return self.move(piece, x, y)
+        return self.move(piece, x, y, promote)
+
+    #Parses standard Chess Notation and makes move
+    #move must be a string in correct Chess Notation!
+    def parseMove(self, move):
+        #Examples: e4, dxe5, Bb5, R2b5, R2xd2, gxh8=Q, O-O, O-O-O
+        side = self.getCurrentSide()
+        #Begin from the back
+        last = move[-1]
+        dest = move[-2:]
+        try:
+            if 0 < int(last) < 9: #No Promotion or Castle
+                if len(move)==2: #Pawn Move
+                    piece = self.findPiece(side, "P", NtoC(dest), NtoC(move[0] + "1")[0], None)
+                    self.moveN(piece, dest, None)
+                    return True
+                if len(move)==3: #Normal move (non pawn)
+                    piece = self.findPiece(side, move[0], NtoC(dest), None, None)
+                    self.moveN(piece, dest, None)
+                    return True
+                if len(move)==4: #Normal Capture or double move or pawn capture
+                    if move[1]=="x":#Normal Capture
+                        if move[0]=="Q" or move[0]=="B" or move[0]=="N" or move[0]=="R" or move[0]=="K":
+                            piece = self.findPiece(side, move[0], NtoC(dest), None, None)
+                            self.moveN(piece, dest, None)
+                            return True
+                        else: #Pawn Capture
+                            piece = self.findPiece(side, "P", NtoC(dest), NtoC(move[0] + "1")[0], None)
+                            self.moveN(piece, dest, None)
+                            return True
+                    else:#double move i.e. R2b2
+                        try:
+                            if 0 < int(move[1]) < 9:
+                                piece = self.findPiece(side, move[0], NtoC(dest), None, int(move[1]))
+                                self.moveN(piece, dest, None)
+                                return True
+                        except:
+                            piece = self.findPiece(side, move[0], NtoC(dest), NtoC(move[1] + "1")[0], None)
+                            self.moveN(piece, dest, None)
+                            return True
+                if len(move)==5: #double Capture
+                    try:
+                        if 0 < int(move[1]) < 9:
+                            piece = self.findPiece(side, move[0], NtoC(dest), None, int(move[1]))
+                            self.moveN(piece, dest, None)
+                            return True
+                    except:
+                        piece = self.findPiece(side, move[0], NtoC(dest), NtoC(move[1] + "1")[0], None)
+                        self.moveN(piece, dest, None)
+                        return True
+        except:
+            pass
+
+        if last=="O": #Castle
+            if move=="O-O":#Kingside
+                if side=="white":
+                    self.moveN(self.getPiece(5, 1), "g1", None)
+                else:
+                    self.moveN(self.getPiece(5, 8), "g8", None)
+                return True
+            else: #Queenside
+                if side=="white":
+                    self.moveN(self.getPiece(5, 1), "c1", None)
+                else:
+                    self.moveN(self.getPiece(5, 8), "c8", None)
+                return True
+
+
+        if last=="Q" or last=="B" or last=="N" or last=="R": #Promotion
+            #examples: e8=Q, dxe8=R
+            piece = self.findPiece(side, "P", NtoC(move[-4:-2]), None, None)
+            self.moveN(piece, move[-4:-2], move[-1])
+            return True
+
+        if last=="#" or last=="+":
+            move = move[:-1]
+            return self.parseMove(move)
+
+
+
+        print("\nParsing FAIL: " + move)
+        return False
+
 
 
 class piece:
@@ -1032,7 +1145,6 @@ class P(piece):
                     return True
                 if game.checkEnPassant(self):  # en passant
                     if sys._getframe(1).f_code.co_name == "move": #execute only if move() called checkmove()
-                        print("Enpassant fail!")
                         self.enPassant = True
                     return True
 
@@ -1266,13 +1378,21 @@ def checkInput():
         pass
 
 
+
+#standard promote=Q
 def m(a, b):  # a, b str in Notation
     time.sleep(0.25)
-    game.moveN(game.getPieceN(a), b)
+    game.moveN(game.getPieceN(a), b, "Q")
+
+def p(move): #in Notation
+    if not game.parseMove(move):
+        print("PARSING FAILED AT " + move)
+
 
 
 
 # MAIN
+
 # startupAnimation()
 game = game()
 
@@ -1280,29 +1400,29 @@ game = game()
 
 
 # TESTS
-'''
+
 #Promotion + Illegal
-m("e2", "e4")
-m("d7", "d6")
+p("e4")
+p("d6")
 
-m("e4", "e5")
-m("d6", "d5")
+p("e5")
+p("d5")
 
-m("a2", "a3")
-m("f7", "f5")
+p("a3")
+p("f5")
 
-m("e5", "f6")
-m("e7", "e6")
+p("exf6")
+p("e6")
 
-m("f6", "f7")
-m("e8", "e7")
+p("f7+")
+p("Ke7")
 
-m("f7", "g8")#Promotoion
-m("a7", "a6")
+p("fxg8=Q")#Promotoion
+p("a6")
 
-m("g8", "e6") #Check not mate (king can take Queen)
-m("e7", "e8") #Illegal
-'''
+p("Qe6+") #Check not mate (king can take Queen)
+p("Ke8") #Illegal
+
 
 '''
 #en passant
@@ -1318,8 +1438,8 @@ m("f7", "f5")
 m("e5", "f6")
 '''
 
-
-# Checkmate test
+'''
+# Checkmate and capture test
 
 m("e2", "e4")
 m("e7", "e5")
@@ -1352,7 +1472,7 @@ m("d4", "d5")
 m("g7", "g5")
 
 m("d5", "f7")  # Capture and Checkmate Qxf7#
-
+'''
 
 '''
 # Checkmate test
@@ -1382,23 +1502,23 @@ m("e8", "e7")  # test for move verification
 
 
 '''
-#Stalemate Test
+#Stalemate Test and double test
 game.pieces = []
 game.addPiece(bK(5, 8))
 game.addPiece(wK(1, 1))
 game.addPiece(wQ(4, 1))
-game.addPiece(wQ(7, 1))
+game.addPiece(wQ(8, 3))
 game.addPiece(wR(1, 7))
 game.refreshBoard()
 display()
-m("g1", "f1")
+m("h3", "f1")
 '''
 
 
 while not game.finished:
     input = raw_input("Move? ")
-    m(str(input[0:2]), str(input[3:5]))
-
+    if not game.parseMove(input):
+        print("Parsing Failed!")
 
 print("\n\nAll Moves: " + str(game.moves))
 

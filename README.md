@@ -19,9 +19,8 @@ Obviously there wont be any checkerboard pattern during play, but i might use it
 - ~~Check for Stalemates~~
 - ~~Correct Chess Notation output~~
   - ~~Check for same piece that might be able to move to Square (No Pawns)~~
-- Chess Notation Parser for Input
-  - Detect if input is [Square Square] or correct Notation
-  - Find Piece and execute move
+- ~~Chess Notation Parser for Input~~
+  - ~~Find Piece and execute move~~
   - File Input for PGN Files
     - Speed Control, and Reverse Move
 - Update Android/Kivy App
@@ -31,7 +30,7 @@ Obviously there wont be any checkerboard pattern during play, but i might use it
     - Piece and move selection (Calculator Style)
     - (Input PGN)
   - (Two Way Communication, simple Text information in App)
-- highlightPossibleMoves(piece) (by turning all reachable Squares white for 1 sec)
+- highlightPossibleMoves(piece) (by turning all reachable Squares white for 0.5 sec)
 - List capture Pieces per Side
 - Running Score per Side (Piece Advantage)
 - Computer
