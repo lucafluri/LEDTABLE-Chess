@@ -1176,7 +1176,8 @@ class game:
         last = move[-1]
         dest = move[-2:]
 
-
+        if move=="reset":
+            self.reset()
         if move=="1/2-1/2":
             self.finished = True
             self.draw = True
@@ -1202,28 +1203,38 @@ class game:
 
 
 
-        #try:
-        if last=="1" or last=="2" or last=="3" or last=="4" or last=="5" or last=="6" or last=="7" or last=="8": #No Promotion or Castle
-            if len(move)==2: #Pawn Move
-                piece = self.findPiece(side, "P", NtoC(dest), NtoC(move[0] + "1")[0], None)
-                self.moveN(piece, dest, None)
-                return True
-            if len(move)==3: #Normal move (non pawn)
-                piece = self.findPiece(side, move[0], NtoC(dest), None, None)
+        try:
+            if last=="1" or last=="2" or last=="3" or last=="4" or last=="5" or last=="6" or last=="7" or last=="8": #No Promotion or Castle
+                if len(move)==2: #Pawn Move
+                    piece = self.findPiece(side, "P", NtoC(dest), NtoC(move[0] + "1")[0], None)
+                    self.moveN(piece, dest, None)
+                    return True
+                if len(move)==3: #Normal move (non pawn)
+                    piece = self.findPiece(side, move[0], NtoC(dest), None, None)
 
-                self.moveN(piece, dest, None)
-                return True
-            if len(move)==4: #Normal Capture or double move or pawn capture
-                if move[1]=="x":#Normal Capture
-                    if move[0]=="Q" or move[0]=="B" or move[0]=="N" or move[0]=="R" or move[0]=="K":
-                        piece = self.findPiece(side, move[0], NtoC(dest), None, None)
-                        self.moveN(piece, dest, None)
-                        return True
-                    else: #Pawn Capture
-                        piece = self.findPiece(side, "P", NtoC(dest), NtoC(move[0] + "1")[0], None)
-                        self.moveN(piece, dest, None)
-                        return True
-                else:#double move i.e. R2b2
+                    self.moveN(piece, dest, None)
+                    return True
+                if len(move)==4: #Normal Capture or double move or pawn capture
+                    if move[1]=="x":#Normal Capture
+                        if move[0]=="Q" or move[0]=="B" or move[0]=="N" or move[0]=="R" or move[0]=="K":
+                            piece = self.findPiece(side, move[0], NtoC(dest), None, None)
+                            self.moveN(piece, dest, None)
+                            return True
+                        else: #Pawn Capture
+                            piece = self.findPiece(side, "P", NtoC(dest), NtoC(move[0] + "1")[0], None)
+                            self.moveN(piece, dest, None)
+                            return True
+                    else:#double move i.e. R2b2
+                        try:
+                            if 0 < int(move[1]) < 9:
+                                piece = self.findPiece(side, move[0], NtoC(dest), None, int(move[1]))
+                                self.moveN(piece, dest, None)
+                                return True
+                        except:
+                            piece = self.findPiece(side, move[0], NtoC(dest), NtoC(move[1] + "1")[0], None)
+                            self.moveN(piece, dest, None)
+                            return True
+                if len(move)==5: #double Capture
                     try:
                         if 0 < int(move[1]) < 9:
                             piece = self.findPiece(side, move[0], NtoC(dest), None, int(move[1]))
@@ -1233,18 +1244,8 @@ class game:
                         piece = self.findPiece(side, move[0], NtoC(dest), NtoC(move[1] + "1")[0], None)
                         self.moveN(piece, dest, None)
                         return True
-            if len(move)==5: #double Capture
-                try:
-                    if 0 < int(move[1]) < 9:
-                        piece = self.findPiece(side, move[0], NtoC(dest), None, int(move[1]))
-                        self.moveN(piece, dest, None)
-                        return True
-                except:
-                    piece = self.findPiece(side, move[0], NtoC(dest), NtoC(move[1] + "1")[0], None)
-                    self.moveN(piece, dest, None)
-                    return True
-        #except:
-            #pass
+        except:
+            pass
 
         if last=="O": #Castle
             if move=="O-O":#Kingside
@@ -1548,16 +1549,6 @@ def startupAnimation():
     display()
 
 
-def checkInput():
-    # falls stdin vorhanden wird es auf input gespeichert
-    if select.select([sys.stdin], [], [], 0)[0]:
-        input = sys.stdin.readline().strip()
-        return input
-    else:
-        pass
-
-
-
 #standard promote=Q
 def m(a, b, t=0.25):  # a, b str in Notation
     time.sleep(t)
@@ -1604,7 +1595,7 @@ def printPGNInfo(string):
                 i+=1
         print("\n---------\n")
 
-def parseString(string, t=0):
+def parseString(string, t=0.5):
     printPGNInfo(string)
 
     length = len(string)
@@ -1652,7 +1643,7 @@ def parseString(string, t=0):
         p(inp, t)
         inp=""
 
-def playPGN(filename="chess/masterGame1.pgn", t=0):
+def playPGN(filename="chess/masterGame1.pgn", t=0.5):
     file = open(filename, "r")
     pgn = file.read()
 
@@ -1837,16 +1828,52 @@ game.refreshBoard()
 display()
 m("h3", "f1")
 '''
-while True:
-    input = raw_input("PGN filename in /chess/? ")
-    game.reset()
-    playPGN("chess/"+input, 0.5)
 
+def checkInput():
+    # falls stdin vorhanden wird es auf input gespeichert
+    if select.select([sys.stdin], [], [], 0)[0]:
+        input = sys.stdin.readline().strip()
+        return input
+    else:
+        pass
+
+'''
+In App:
+1. Decide between play and PGN Mode
+    a) If play:
+        i. Parse every input (add reset parse)
+    b) If PGN:
+        i. Select from directory and send PGN as string
+        ii. playPGN string
+
+'''
+print("Please enter one of the following commands:\n- play (for manual Play)\n- pgn (for parsing and playing a string in pgn format)")
+while True:
+    #input = raw_input("PGN filename in /chess/? ")
+    inp = checkInput()
+    if inp == "play":
+        game.reset()
+        while not game.finished:
+            inp = checkInput()
+            while inp==None:
+                inp = checkInput()
+            p(inp)
+
+    if inp=="pgn":
+        game.reset()
+        inp = checkInput()
+        while inp==None:
+            inp = checkInput()
+        parseString(inp)
+
+    else:
+        continue
+    #playPGN("chess/"+input, 0.5)
 
     while not game.finished:
         input = raw_input("Move? ")
-        if not game.parseMove(input):
-            print("Parsing Failed!")
+        p(input)
+
 
 
 
