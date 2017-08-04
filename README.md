@@ -25,15 +25,17 @@ Obviously there wont be any checkerboard pattern during play, but i might use it
     - ~~Speed Control~~, and Reverse Move
 - Update Android/Kivy App
   - ~~Decide on Input Method~~
-  - Several Screens are needed Menu
+  - ~~Several Screens are needed Menu~~
     - ~~Mode Selection~~
-    - Piece and move selection (Calculator Style)
-    - (Input PGN)
-  - (Two Way Communication, simple Text information in App)
+    - ~~Send Move in Notation Style~~
+    - ~~(Input PGN)~~
+  - Button to highlight own Pieces
+  - (Two Way Communication, simple Text information in App)?
+- highlightOwnPieces(side) because differentiating the Pieces becomes increasingly difficult the fewer there are
 - highlightPossibleMoves(piece) (by turning all reachable Squares white for 0.5 sec)
-- List capture Pieces per Side
-- Running Score per Side (Piece Advantage)
-- Computer
+- (List capture Pieces per Side)?
+- (Computer) (The App is currently not very good coded, but it works very well. But the Pi has to do a lot of Computation per Move, so adding more for "Chess Computer" Purposes adds a lot of calculation time. But that shouldn't be a problem because moves should not be executed instantly...)
+  - Running Score per Side (Piece Advantage)
   - Move Eval()
     - For each Piece, list all pieces it is protected by
     - Update all piece information  
