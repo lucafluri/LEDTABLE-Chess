@@ -11,7 +11,7 @@ And due to only being able to display color, the 12 pieces (6 per Side) have to 
 Obviously there wont be any checkerboard pattern during play, but i might use it as a startup animation.
 
 ### Current State
-The Program is currently able to correctly validate any move, all special Chess Rules (Castling, En Passant and Promotions) have been accounted for. OnIt is also possible to load PGN files and "let it play".  
+The Program is currently able to correctly validate any move, all special Chess Rules (Castling, En Passant and Promotions) have been accounted for. It is also possible to load PGN files and "let it play".  
 The Base App is therefore finished.
 
 ### TODO
