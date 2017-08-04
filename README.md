@@ -21,8 +21,8 @@ Obviously there wont be any checkerboard pattern during play, but i might use it
   - ~~Check for same piece that might be able to move to Square (No Pawns)~~
 - ~~Chess Notation Parser for Input~~
   - ~~Find Piece and execute move~~
-  - File Input for PGN Files
-    - Speed Control, and Reverse Move
+  - ~~File Input for PGN Files~~
+    - ~~Speed Control~~, and Reverse Move
 - Update Android/Kivy App
   - Decide on Input Method
   - Several Screens are needed Menu
