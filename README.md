@@ -24,9 +24,9 @@ Obviously there wont be any checkerboard pattern during play, but i might use it
   - ~~File Input for PGN Files~~
     - ~~Speed Control~~, and Reverse Move
 - Update Android/Kivy App
-  - Decide on Input Method
+  - ~~Decide on Input Method~~
   - Several Screens are needed Menu
-    - Mode Selection
+    - ~~Mode Selection~~
     - Piece and move selection (Calculator Style)
     - (Input PGN)
   - (Two Way Communication, simple Text information in App)
