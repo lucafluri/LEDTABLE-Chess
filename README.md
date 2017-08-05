@@ -17,7 +17,7 @@ Obviously there wont be any checkerboard pattern during play, but i might use it
 
 The above Picture represents the chessboard with all correct RGB Values. The general Idea is that the color for the white pieces look a bit lighter/washed out.  
 One can rarely see the difference between the black Rooks and Pawns on a normal Screen, but since the LED's in the Table aren't perfect, the difference between each piece is very noticable and the black Rooks look a lot more purple. I might change the colors of the Rooks to a cyan color in the future.  
-Another point i had to consider while choosing the colors was the very bad color accuracy of the LED's i used. One half is just ok, while the other half has inaccuracies with green and blue which leads to a white that looks very red/pink. So in order to still spot the difference between each piece, the base color inaccuracy has to be as low as possible for the color, therefore colors very near to the base colors (rgb) is preferred.
+Another point i had to consider while choosing the colors was the very bad color accuracy of the LED's i used. One half is just ok, while the other half has inaccuracies with green and blue which leads to a white that looks very red/pink. So in order to still spot the difference between each piece, the base color inaccuracy has to be as low as possible for the color, therefore colors very near to the base colors (rgb) are preferred.
 
 ### Current State
 The Program is currently able to correctly validate any move, all special Chess Rules (Castling, En Passant and Promotions) have been accounted for. It is also possible to load PGN files and "let it play".  
