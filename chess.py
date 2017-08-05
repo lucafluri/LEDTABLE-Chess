@@ -966,7 +966,6 @@ class game:
         else:
             return False
 
-
     def fixKing(self, king):
         for piece in self.pieces:
             if piece == king:
@@ -975,7 +974,6 @@ class game:
         self.addPiece(king)
         print("Fixed King")
         return False
-
 
     def getPossibleMoves(self, side, king=None):
         #if not king==None:
@@ -1067,6 +1065,24 @@ class game:
                                 self.moves[-1] = self.moves[-1][:1] + xToN(piece.x) + self.moves[-1][1:]
                                 return True
         return False
+
+    def showPieces(self):
+        side = self.getCurrentSide()
+        for piece in self.pieces:
+            if piece.side==side:
+                piece.turnWhite()
+                self.paintPiece(piece)
+        display()
+        time.sleep(0.5)
+        for piece in self.pieces:
+            if piece.side==side:
+                piece.resetColor()
+                self.paintPiece(piece)
+        display()
+
+
+
+
 
     def execMove(self, piece, x, y):
         piece.moved = True
@@ -1178,29 +1194,28 @@ class game:
 
         if move=="reset":
             self.reset()
+        if move=="showPieces":
+            self.showPieces()
+
+
         if move=="1/2-1/2":
             self.finished = True
             self.draw = True
             print("\n" + move)
             self.update(False)
             return True
-        try:
-            resWhite, resBlack = move.split("-")
-            if int(resWhite) > int(resBlack):
-                self.finished = True
-                self.setCurrentSide("white")
-                print("\n\n" + move)
-                self.update(False)
-                return True
-            else:
-                self.finished = True
-                self.setCurrentSide("black")
-                print("\n\n" + move)
-                self.update(False)
-                return True
-        except:
-            pass
-
+        if move=="1-0"
+            self.finished = True
+            self.setCurrentSide("white")
+            print("\n\n" + move)
+            self.update(False)
+            return True
+        if move=="0-1"
+            self.finished = True
+            self.setCurrentSide("black")
+            print("\n\n" + move)
+            self.update(False)
+            return True
 
 
         try:
@@ -1261,18 +1276,18 @@ class game:
                     self.moveN(self.getPiece(5, 8), "c8", None)
                 return True
 
+        try:
+            if last=="Q" or last=="B" or last=="N" or last=="R": #Promotion
+                #examples: e8=Q, dxe8=R
+                piece = self.findPiece(side, "P", NtoC(move[-4:-2]), None, None)
+                self.moveN(piece, move[-4:-2], move[-1])
+                return True
 
-        if last=="Q" or last=="B" or last=="N" or last=="R": #Promotion
-            #examples: e8=Q, dxe8=R
-            piece = self.findPiece(side, "P", NtoC(move[-4:-2]), None, None)
-            self.moveN(piece, move[-4:-2], move[-1])
-            return True
-
-        if last=="#" or last=="+":
-            move = move[:-1]
-            return self.parseMove(move)
-
-
+            if last=="#" or last=="+":
+                move = move[:-1]
+                return self.parseMove(move)
+        except:
+            pass
 
         return False
 
@@ -1282,6 +1297,8 @@ class piece:
     name = "piece"
     firstMove = False
     moved = False
+    color = []
+    scolor = []
 
     def __init__(self, x, y):
         game.pieces.append(self)
@@ -1298,6 +1315,13 @@ class piece:
 
     def getInfo(self):
         return str(self.side + " " + self.name + "@" + CtoN(self.x, self.y))
+
+    def turnWhite(self):
+        self.scolor = self.color
+        self.color = [255, 255, 255]
+
+    def resetColor(self):
+        self.color = self.scolor
 
 
 class P(piece):
