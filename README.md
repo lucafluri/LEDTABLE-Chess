@@ -39,15 +39,15 @@ The Base App is therefore finished.
   - ~~Find Piece and execute move~~
   - ~~File Input for PGN Files~~
     - ~~Speed Control~~, and Reverse Move
-- Update Android/Kivy App
+- ~~Update Android/Kivy App~~
   - ~~Decide on Input Method~~
   - ~~Several Screens are needed Menu~~
     - ~~Mode Selection~~
     - ~~Send Move in Notation Style~~
     - ~~(Input PGN)~~
-  - Button to highlight own Pieces
+  - ~~Button to highlight own Pieces~~
   - (Two Way Communication, simple Text information in App)?
-- highlightOwnPieces(side) because differentiating the Pieces becomes increasingly difficult the fewer there are
+- ~~highlightOwnPieces(side) because differentiating the Pieces becomes increasingly difficult the fewer there are~~
 - highlightPossibleMoves(piece) (by turning all reachable Squares white for 0.5 sec)
 - (List capture Pieces per Side)?
 - (Computer) (The App is currently not very good coded, but it works very well. But the Pi has to do a lot of Computation per Move, so adding more for "Chess Computer" Purposes adds a lot of calculation time. But that shouldn't be a problem because moves should not be executed instantly...)
