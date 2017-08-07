@@ -2,21 +2,28 @@
 # coding: utf8
 import time
 import array
-import fcntl
+try:
+    import fcntl
+except:
+    pass
 import random
 import sys
 import os
 import select
 import numpy
 import math
-from imgdisp import imgdisp
 
-# Open SPI device
-spidev = file("/dev/spidev0.0", "wb")
-# byte array to store rgb values
+
 rgb = bytearray(3)
-# setting spi frequency to 400kbps
-fcntl.ioctl(spidev, 0x40046b04, array.array('L', [400000]))
+
+try:
+    # Open SPI device
+    spidev = file("/dev/spidev0.0", "wb")
+    # byte array to store rgb values
+    # setting spi frequency to 400kbps
+    fcntl.ioctl(spidev, 0x40046b04, array.array('L', [400000]))
+except:
+    pass
 
 # creating 10x10 matrix
 matrix = [[[0 for x in range(3)] for x in range(10)] for x in range(10)]
@@ -265,9 +272,19 @@ def display():
             rgb[0] = fmatrix[x][y][0]
             rgb[1] = fmatrix[x][y][1]
             rgb[2] = fmatrix[x][y][2]
-            spidev.write(rgb)
+            try:
+                spidev.write(rgb)
+            except:
+                pass
 
-    spidev.flush()
+
+    try:
+        spidev.flush()
+    except:
+        pass
+
+    f = open("save.matrix", "w+")
+    f.write(str(fmatrix))
 
 
 def clearMatrix():
@@ -1204,13 +1221,13 @@ class game:
             print("\n" + move)
             self.update(False)
             return True
-        if move=="1-0"
+        if move=="1-0":
             self.finished = True
             self.setCurrentSide("white")
             print("\n\n" + move)
             self.update(False)
             return True
-        if move=="0-1"
+        if move=="0-1":
             self.finished = True
             self.setCurrentSide("black")
             print("\n\n" + move)
@@ -1858,8 +1875,6 @@ def checkInput():
     if select.select([sys.stdin], [], [], 0)[0]:
         input = sys.stdin.readline().strip()
         return input
-    else:
-        pass
 
 '''
 In App:
