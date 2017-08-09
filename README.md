@@ -3,7 +3,7 @@
 Chess Application for my LED-TABLE.  
 https://github.com/lucafluri/LEDTABLE
 
-**Status:** Base App finished
+**Status:** Finished
 
 ### Idea  
 Chess App (for starting and simplicity purposes without Computer at the beginning).  
