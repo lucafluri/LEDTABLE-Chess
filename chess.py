@@ -1644,6 +1644,9 @@ def parseString(string, t=0.5):
     i = 0
 
     while i < length:        #Ignore everything in [], {}
+        if inp=="reset":
+            game.reset()
+            break
         if string[i]=="[":
             i+=1
             while not string[i]=="]":
@@ -1657,29 +1660,35 @@ def parseString(string, t=0.5):
             i+=1
             continue
 
-
-        #ignore \n
-        if string[i:i+1]=="\n":
-            i += 1
+        #ignore \r
+        if string[i]=="\\":
+            i += 2
             if not inp=="":
                 p(inp, t)
             inp=""
-
             continue
+
         #ignore spaces
         if string[i]==" ":
             i+=1
-            p(inp, t)
+            if not inp=="":
+                p(inp, t)
             inp=""
+            continue
 
         if not string[i]==" ":
             inp = inp + string[i]
             i+=1
+            if inp[-1]==".":
+                inp = ""
+                i+=1
+            continue
 
         #check if in count
-        if inp[-1]==".":
-            inp = ""
-            i+=1
+
+
+
+
     if not inp=="":
         p(inp, t)
         inp=""
@@ -1690,6 +1699,12 @@ def playPGN(filename="chess/masterGame1.pgn", t=0.5):
 
     parseString(pgn, t)
 
+
+def checkInput():
+    # falls stdin vorhanden wird es auf input gespeichert
+    if select.select([sys.stdin], [], [], 0)[0]:
+        input = sys.stdin.readline().strip()
+        return input
 
 
 def test():
@@ -1724,158 +1739,6 @@ def test():
 game = game()
 
 
-# TESTS
-'''playPGN("chess/test.pgn", 0)
-time.sleep(1)
-game.reset()'''
-#playPGN("chess/masterGame1.pgn", 0)
-#test()
-
-
-
-'''
-#Promotion + Illegal
-p("e4")
-p("d6")
-
-p("e5")
-p("d5")
-
-p("a3")
-p("f5")
-
-p("exf6")
-p("e6")
-
-p("f7+")
-p("Ke7")
-
-p("fxg8=Q")#Promotoion
-p("a6")
-
-p("Qe6+") #Check not mate (king can take Queen)
-p("Ke8") #Illegal
-'''
-
-'''
-#en passant
-m("e2", "e4")
-m("d7", "d6")
-
-m("e4", "e5")
-m("d6", "d5")
-
-m("a2", "a3")
-m("f7", "f5")
-
-m("e5", "f6")
-'''
-
-'''
-# Checkmate and capture test
-
-m("e2", "e4")
-m("e7", "e5")
-
-m("f1", "c4")
-m("b7", "b6")
-# print(game.getPieceN("d4").getInfo())
-
-m("g2", "g4")
-m("f7", "f5")
-
-m("g4", "f5") #capture gxf5
-m("b6", "b5")
-
-m("c4", "b5") #capture Bxb5
-m("a7", "a6")
-
-m("b5", "c4")
-m("a6", "a5")
-
-m("d2", "d4")
-m("e5", "d4")  # capture exd4
-
-m("d1", "d4")  # capture Qxd4
-
-m("b8", "c6")
-
-
-m("d4", "d5")
-m("g7", "g5")
-
-m("d5", "f7")  # Capture and Checkmate Qxf7#
-'''
-
-'''
-# Checkmate test
-
-m("e2", "e4")
-m("e7", "e5")
-
-m("f1", "c4")
-m("a7", "a6")
-# print(game.getPieceN("d4").getInfo())
-
-m("d2", "d4")
-m("e5", "d4")  # capture exd4
-
-m("d1", "d4")  # capture Qxd4
-
-m("b8", "c6")
-
-
-m("d4", "d5")
-m("g7", "g5")
-
-m("d5", "f7")  # Capture and Checkmate Qxf7##
-m("e8", "e7")  # test for move verification
-
-'''
-'''
-#King test
-game.pieces = []
-game.addPiece(wK(1, 5))
-game.addPiece(wP(1, 4))
-game.addPiece(wP(2, 3))
-game.addPiece(wP(3, 2))
-game.addPiece(wP(3, 5))
-game.addPiece(wP(6, 4))
-game.addPiece(wP(8, 4))
-
-game.addPiece(bK(2, 8))
-game.addPiece(bP(1, 6))
-game.addPiece(bP(2, 7))
-game.addPiece(bP(3, 6))
-game.addPiece(bP(4, 5))
-game.addPiece(bP(6, 5))
-game.addPiece(bP(8, 5))
-
-game.refreshBoard()
-display()
-
-p("Kb6")
-p("Kc8")
-'''
-'''
-#Stalemate Test and double test
-game.pieces = []
-game.addPiece(bK(5, 8))
-game.addPiece(wK(1, 1))
-game.addPiece(wQ(4, 1))
-game.addPiece(wQ(8, 3))
-game.addPiece(wR(1, 7))
-game.refreshBoard()
-display()
-m("h3", "f1")
-'''
-
-def checkInput():
-    # falls stdin vorhanden wird es auf input gespeichert
-    if select.select([sys.stdin], [], [], 0)[0]:
-        input = sys.stdin.readline().strip()
-        return input
-
 '''
 In App:
 1. Decide between play and PGN Mode
@@ -1903,6 +1766,7 @@ while True:
         inp = checkInput()
         while inp==None:
             inp = checkInput()
+        print("Received: " + inp)
         parseString(inp)
 
     else:
