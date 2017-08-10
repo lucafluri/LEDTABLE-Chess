@@ -281,10 +281,11 @@ def display():
     try:
         spidev.flush()
     except:
-        pass
+        f = open("save.matrix", "r")
+        if not f.read()==str(fmatrix):
+            f = open("save.matrix", "w+")
+            f.write(str(fmatrix))
 
-    f = open("save.matrix", "w+")
-    f.write(str(fmatrix))
 
 
 def clearMatrix():
